@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: mediai-backend
+    env: docker
+    plan: free # or starter
+    region: singapore # Change to your preferred region (e.g., oregon, frankfurt, etc.)
+    buildCommand: "" # Docker uses Dockerfile
+    startCommand: "" # Docker uses ENTRYPOINT
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_HOST
+        fromDatabase:
+          name: mediai-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mediai-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: mediai-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: mediai-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mediai-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false # User will set this in Render UI
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update # Use update for persistence, not 'create'
+
+databases:
+  - name: mediai-db
+    plan: free
+    region: singapore # Matches service region
