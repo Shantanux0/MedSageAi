@@ -1,8 +1,10 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { PlayCircle, Shield, Lock, Eye, ArrowRight, Activity, FileText } from 'lucide-react';
+import { PlayCircle, Shield, Lock, Eye, ArrowRight, Activity, FileText, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { useState } from 'react';
+import VideoModal from '../../components/ui/VideoModal';
 
 const FadeInContent = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
   const ref = useRef(null);
@@ -15,8 +17,42 @@ const FadeInContent = ({ children, delay = 0 }: { children: React.ReactNode, del
 };
 
 export default function LandingPage() {
+  const [showVideo, setShowVideo] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(1);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoUrl = "/videos/tour.mp4";
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    if (videoRef.current) {
+      videoRef.current.volume = val;
+      if (val > 0) {
+        setIsMuted(false);
+        videoRef.current.muted = false;
+      } else {
+        setIsMuted(true);
+        videoRef.current.muted = true;
+      }
+    }
+  };
+
   return (
     <div className="w-full bg-background overflow-hidden font-body text-text-black">
+      
+      <VideoModal 
+        isOpen={showVideo} 
+        onClose={() => setShowVideo(false)} 
+        videoUrl={videoUrl} 
+      />
       
       {/* SECTION 1: HERO */}
       <section className="relative w-full min-h-[90vh] flex flex-col md:flex-row items-center justify-between pt-32 pb-20 px-6 md:px-12 lg:px-24 bg-surface overflow-hidden">
@@ -38,7 +74,14 @@ export default function LandingPage() {
           
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }} className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <Link to="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full sm:w-auto gap-2 px-8 h-14 bg-text-black text-white text-[15px] font-medium shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">Get Started Free <ArrowRight className="w-4 h-4"/></Button></Link>
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto gap-2 px-8 h-14 bg-transparent border border-[#CDE5DA] text-text-black hover:bg-[#F0F7F4] text-[15px] font-medium transition-all duration-300"><PlayCircle className="w-5 h-5"/> Cinematic Tour</Button>
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              onClick={() => setShowVideo(true)}
+              className="w-full sm:w-auto gap-2 px-8 h-14 bg-transparent border border-[#CDE5DA] text-text-black hover:bg-[#F0F7F4] text-[15px] font-medium transition-all duration-300"
+            >
+              <PlayCircle className="w-5 h-5"/> Cinematic Tour
+            </Button>
           </motion.div>
           
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.8 }} className="mt-16 pt-8 border-t border-[#E8F3EE] flex flex-wrap justify-start gap-6 md:gap-12 text-[13px] text-text-muted font-medium w-full">
@@ -145,6 +188,62 @@ export default function LandingPage() {
                 </FadeInContent>
              ))}
            </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: CINEMATIC SHOWCASE */}
+      <section className="bg-white py-24 md:py-32 px-6 md:px-12 border-b border-border overflow-hidden">
+        <div className="max-w-[1280px] mx-auto">
+           <FadeInContent>
+             <div className="text-center mb-16">
+                <span className="text-primary text-[13px] font-bold tracking-widest uppercase mb-4 block">Product Showcase</span>
+                <h2 className="font-display text-[42px] md:text-[52px] font-semibold text-text-black tracking-tight">Experience the Precision.</h2>
+                <p className="text-[18px] text-text-mid font-light mt-6 max-w-2xl mx-auto">Watch how MediSage AI transforms complex medical data into a cinematic clinical flowsheet.</p>
+             </div>
+           </FadeInContent>
+
+           <FadeInContent delay={0.2}>
+             <div className="relative w-full aspect-video rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(2,77,48,0.1)] border border-border bg-black group">
+                <div className="absolute inset-0 bg-text-black/20 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700"></div>
+                <video 
+                   ref={videoRef}
+                   src="/videos/tour.mp4" 
+                   autoPlay 
+                   loop 
+                   muted={isMuted}
+                   playsInline 
+                   className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-8 left-8 z-20 flex items-center gap-3">
+                   <div className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-white/40 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                      <span className="text-[12px] font-bold text-text-black uppercase tracking-wider">Live Preview</span>
+                   </div>
+                </div>
+
+                {/* VOLUME CONTROLS */}
+                <div className="absolute bottom-10 right-10 z-20 flex items-center gap-4 bg-black/60 backdrop-blur-xl px-5 py-3 rounded-full border border-white/20 group/volume hover:bg-black/80 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)] border-primary/30">
+                   <button 
+                      onClick={toggleMute} 
+                      className="text-white hover:text-primary hover:scale-125 transition-all duration-300"
+                      title={isMuted ? "Unmute" : "Mute"}
+                   >
+                      {isMuted || volume === 0 ? <VolumeX className="w-6 h-6 animate-pulse" /> : <Volume2 className="w-6 h-6" />}
+                   </button>
+                   <div className="flex flex-col items-start gap-1">
+                      <input 
+                         type="range" 
+                         min="0" 
+                         max="1" 
+                         step="0.01" 
+                         value={isMuted ? 0 : volume} 
+                         onChange={handleVolumeChange}
+                         className="w-0 group-hover/volume:w-32 transition-all duration-700 bg-white/20 h-1.5 rounded-full appearance-none cursor-pointer accent-primary"
+                      />
+                   </div>
+                </div>
+             </div>
+           </FadeInContent>
         </div>
       </section>
 

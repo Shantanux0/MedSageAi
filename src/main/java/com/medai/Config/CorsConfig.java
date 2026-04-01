@@ -16,7 +16,8 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",   // Vite dev
                 "http://localhost:3000",   // CRA dev
-                "https://your-frontend.vercel.app"
+                "https://medsageai.vercel.app",
+                "http://medsageai.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
