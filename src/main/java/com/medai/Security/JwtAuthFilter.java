@@ -33,16 +33,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
-        final String email = jwtUtil.extractEmail(token);
+        try {
+            final String email = jwtUtil.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var userDetails = userDetailsService.loadUserByUsername(email);
-            if (jwtUtil.isTokenValid(token, userDetails)) {
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                var userDetails = userDetailsService.loadUserByUsername(email);
+                if (jwtUtil.isTokenValid(token, userDetails)) {
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Log for debugging if needed, but let the request proceed to the next filter
+            System.err.println("JWT processing failed: " + e.getMessage());
         }
         chain.doFilter(request, response);
     }
